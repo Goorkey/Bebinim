@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0e0e10">
+  <meta name="description" content="Watch the same video in sync with one other person, with chat.">
+  <title>Watch Together</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='12' cy='16' r='9' fill='none' stroke='%23e5484d' stroke-width='3'/%3E%3Ccircle cx='20' cy='16' r='9' fill='none' stroke='%23eeeeef' stroke-width='3'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="css/app.css">
+  <script type="module" src="js/main.js"></script>
+</head>
+<body>
+
+<!-- Icon sprite: <svg class="i"><use href="#i-name"/></svg> -->
+<svg class="sprite" aria-hidden="true" focusable="false">
+  <symbol id="i-play" viewBox="0 0 24 24"><polygon points="7 4 20 12 7 20" fill="currentColor"/></symbol>
+  <symbol id="i-pause" viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16" fill="currentColor"/><rect x="14" y="4" width="4" height="16" fill="currentColor"/></symbol>
+  <symbol id="i-volume" viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a10 10 0 0 1 0 14"/></symbol>
+  <symbol id="i-mute" viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></symbol>
+  <symbol id="i-expand" viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></symbol>
+  <symbol id="i-collapse" viewBox="0 0 24 24"><path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/></symbol>
+  <symbol id="i-chat" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></symbol>
+  <symbol id="i-send" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></symbol>
+  <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></symbol>
+  <symbol id="i-film" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="2.2"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="2" y1="7" x2="7" y2="7"/><line x1="2" y1="17" x2="7" y2="17"/><line x1="17" y1="17" x2="22" y2="17"/><line x1="17" y1="7" x2="22" y2="7"/></symbol>
+  <symbol id="i-close" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></symbol>
+  <symbol id="i-shuffle" viewBox="0 0 24 24"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></symbol>
+</svg>
+
+<!-- ============ Lobby ============ -->
+<main id="lobby">
+  <div class="brand">
+    <svg class="logo" viewBox="0 0 48 32" aria-hidden="true"><circle cx="17" cy="16" r="12.5"/><circle cx="31" cy="16" r="12.5"/></svg>
+    <h1>Watch Together</h1>
+  </div>
+  <p class="sub">Watch the same video in sync with one other person. Pick a room code, share it, and both of you join.</p>
+  <p id="invited" class="note" hidden></p>
+
+  <form id="joinForm" class="stack" novalidate>
+    <div class="field">
+      <label for="room">Room code</label>
+      <div class="inline">
+        <input id="room" class="input" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" maxlength="32" required>
+        <button type="button" id="reroll" class="btn secondary square" aria-label="Generate a new room code"><svg class="i"><use href="#i-shuffle"/></svg></button>
+      </div>
+    </div>
+    <button class="btn" type="submit">Join room</button>
+    <p id="lobbyMsg" class="msg" role="alert" hidden></p>
+  </form>
+
+  <p class="foot">A room holds two people. Anyone with the code can join, so choose one that is hard to guess.</p>
+</main>
+
+<!-- ============ Stage ============ -->
+<div id="stage" hidden>
+  <div id="mw"></div>
+  <video id="v" playsinline hidden></video>
+
+  <!-- Touch zones: double-tap left/right to skip, bottom quarter opens the message box -->
+  <div id="zl"></div><div id="zr"></div><div id="zt"></div>
+  <div id="spin" aria-hidden="true"></div>
+
+  <div id="fL" class="fl" aria-hidden="true"></div>
+  <div id="fR" class="fl" aria-hidden="true"></div>
+
+  <div id="top">
+    <div id="status" class="pill fadable" data-state="connecting" role="status">
+      <span class="dot"></span><span id="statusText">Connecting…</span>
+    </div>
+    <button id="invite" type="button" class="cbtn fadable" aria-label="Copy invite link"><svg class="i"><use href="#i-link"/></svg></button>
+    <button id="ci" type="button" class="cbtn" aria-label="Show chat history" aria-pressed="false"><svg class="i"><use href="#i-chat"/></svg></button>
+  </div>
+
+  <aside id="pn" aria-label="Chat history">
+    <p id="pe">No messages yet. Tap the bottom of the screen to write one.</p>
+    <div id="pl" role="log" aria-live="polite"></div>
+  </aside>
+
+  <div id="ctl">
+    <input id="bar" type="range" min="0" max="1000" step="1" value="0" aria-label="Seek">
+    <div id="row">
+      <button id="pp" type="button" class="cbtn" aria-label="Play"><svg class="i"><use href="#i-play"/></svg></button>
+      <span id="tm" class="time">0:00 / 0:00</span>
+      <span class="grow"></span>
+      <button id="wr" type="button" class="cbtn" aria-label="Write a message"><svg class="i"><use href="#i-send"/></svg></button>
+      <button id="mute" type="button" class="cbtn" aria-label="Mute"><svg class="i"><use href="#i-volume"/></svg></button>
+      <input id="vol" type="range" min="0" max="1" step="0.05" value="1" aria-label="Volume">
+      <select id="sp" class="csel" aria-label="Playback speed (shared)">
+        <option value="0.5">0.5×</option><option value="0.75">0.75×</option><option value="1" selected>1×</option>
+        <option value="1.25">1.25×</option><option value="1.5">1.5×</option><option value="2">2×</option>
+      </select>
+      <select id="ql" class="csel" aria-label="Video quality (only for you)" hidden></select>
+      <button id="fs" type="button" class="cbtn" aria-label="Enter full screen"><svg class="i"><use href="#i-expand"/></svg></button>
+      <button id="src" type="button" class="cbtn" aria-label="Change video"><svg class="i"><use href="#i-film"/></svg></button>
+    </div>
+  </div>
+
+  <div id="tb" hidden>
+    <input id="ti" class="input" placeholder="Type a message and press Enter" maxlength="500" enterkeyhint="send" autocomplete="off" aria-label="Message">
+  </div>
+
+  <!-- Choose a video -->
+  <div id="sd" role="dialog" aria-modal="true" aria-labelledby="sdTitle" hidden>
+    <div class="card">
+      <div class="card-head">
+        <h2 id="sdTitle">Choose what to watch</h2>
+        <button id="sdClose" type="button" class="cbtn" aria-label="Close"><svg class="i"><use href="#i-close"/></svg></button>
+      </div>
+
+      <form id="ytForm" class="stack" novalidate>
+        <input id="yu" class="input" placeholder="Paste a YouTube link" autocomplete="off" autocapitalize="none" spellcheck="false" aria-label="YouTube link">
+        <button class="btn" type="submit">Play link</button>
+      </form>
+
+      <label id="pick" class="btn secondary">
+        Upload a video
+        <input type="file" id="fi" accept="video/*" hidden>
+      </label>
+
+      <div id="upRow" hidden>
+        <progress id="upBar" max="100" value="0"></progress>
+        <div class="inline spread">
+          <span id="upText" class="muted">Uploading…</span>
+          <button id="upCancel" type="button" class="link">Cancel</button>
+        </div>
+      </div>
+
+      <p id="sMsg" class="msg" role="status" hidden></p>
+      <p id="hint" class="muted small"></p>
+    </div>
+  </div>
+
+  <div id="toasts" role="status" aria-live="polite"></div>
+</div>
+
+</body>
+</html>

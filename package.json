@@ -1,0 +1,20 @@
+{
+  "name": "watch-together",
+  "version": "2.0.0",
+  "description": "Watch a video in sync with one other person, with chat.",
+  "private": true,
+  "license": "MIT",
+  "main": "server.js",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "ws": "^8.18.0"
+  }
+}
